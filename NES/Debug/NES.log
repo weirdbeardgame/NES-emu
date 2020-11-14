@@ -1,0 +1,6 @@
+﻿  M6502.cpp
+C:\Users\final\source\repos\NES\NES\M6502.cpp(40,16): warning C4552: '>>': result of expression not used
+C:\Users\final\source\repos\NES\NES\M6502.cpp(59,16): warning C4552: '<<': result of expression not used
+  main.cpp
+  Generating Code...
+  NES.vcxproj -> C:\Users\final\source\repos\NES\Debug\NES.exe
