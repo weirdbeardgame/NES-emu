@@ -19,7 +19,7 @@ class M6502
 {
 private:
 	registers* activeRegs;
-	std::vector<uint8_t> ram;
+	uint8_t ram[0x800];
 	int i = 0;
 
 public:
@@ -27,11 +27,13 @@ public:
 	void Reset();
 	void ADC();
 	bool AND();
-	void EOR();
+	bool EOR();
 	void LSR();
 	bool ORA();
 	void RTI();
+	void SED();
 	void SEI();
+	void STA();
 	void TAY();
 	void execute(uint8_t OP);
 	void update();
