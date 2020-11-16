@@ -14,11 +14,10 @@ void M6502::Reset()
 
 	std::ifstream in("C:/Users/final/source/repos/NES/nestest.nes", std::ios::binary);
 
-	ram.insert(ram.begin(),
-		std::istream_iterator<uint8_t>(in),
-		std::istream_iterator<uint8_t>());
-
-
+	for (uint8_t i = 0; i < sizeof(in); i++)
+	{
+		in >> ram[i];
+	}
 }
 bool M6502::AND()
 {
@@ -31,10 +30,12 @@ void M6502::ADC()
 
 	if (carry & 1)
 	{
-		activeRegs->P |= 1 << 7;
+		activeRegs->P |= 0 << 1;
 	}
 
+	activeRegs->A + ram[activeRegs->PC] + activeRegs->P >> 0;
 
+	activeRegs->P |= 0 << activeRegs->A << 7; // Setting overflow in carry
 
 } 
 
@@ -51,6 +52,18 @@ bool M6502::ORA()
 void M6502::LSR()
 {
 	activeRegs->A >> 1;
+}
+
+void M6502::ROL() // ROL copies the initial Carry flag to the lowmost bit of the byte; Either Ram or Accumulator. Rn, just Accumulator. 
+{
+	if (activeRegs->A == 0)
+	{
+		activeRegs->P |= 1 << 7;
+	}
+	else
+	{
+		activeRegs->A << (activeRegs->P >> 0 & 1);
+	}
 }
 
 void M6502::RTI()
@@ -101,6 +114,13 @@ void M6502::execute(uint8_t OP) // What Addressing Mode are we in?
 	case 0x01:
 		// ORA! Logical Inclusive OR
 		ORA();
+		break;
+	case 0x1A:
+		// NOP
+		return;
+		break;
+	case 0x2A:
+		ROL();
 		break;
 	case 0x40:
 		// Return from interrupt
@@ -154,7 +174,6 @@ void M6502::execute(uint8_t OP) // What Addressing Mode are we in?
 		TAY();
 		break;
 	case 0xF8:
-
 		break;
 	}
 }

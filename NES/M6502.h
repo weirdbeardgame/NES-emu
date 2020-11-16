@@ -31,6 +31,7 @@ public:
 	void LSR();
 	bool ORA();
 	void RTI();
+	void ROL();
 	void SED();
 	void SEI();
 	void STA();
