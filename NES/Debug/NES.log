@@ -1,6 +1,12 @@
 ﻿  M6502.cpp
-C:\Users\final\source\repos\NES\NES\M6502.cpp(40,16): warning C4552: '>>': result of expression not used
-C:\Users\final\source\repos\NES\NES\M6502.cpp(59,16): warning C4552: '<<': result of expression not used
+C:\Users\final\source\repos\NES\NES\M6502.cpp(24,22): warning C4552: '&': result of expression not used
+C:\Users\final\source\repos\NES\NES\M6502.cpp(29,38): warning C4552: '+': result of expression not used
+C:\Users\final\source\repos\NES\NES\M6502.cpp(31,21): warning C4552: '|': result of expression not used
+C:\Users\final\source\repos\NES\NES\M6502.cpp(36,16): warning C4552: '^': result of expression not used
+C:\Users\final\source\repos\NES\NES\M6502.cpp(41,22): warning C4552: '+': result of expression not used
+C:\Users\final\source\repos\NES\NES\M6502.cpp(46,17): warning C4552: '|': result of expression not used
+C:\Users\final\source\repos\NES\NES\M6502.cpp(51,16): warning C4552: '>>': result of expression not used
+C:\Users\final\source\repos\NES\NES\M6502.cpp(62,17): warning C4552: '<<': result of expression not used
   main.cpp
   Generating Code...
   NES.vcxproj -> C:\Users\final\source\repos\NES\Debug\NES.exe

@@ -19,34 +19,41 @@ void M6502::Reset()
 		in >> ram[i];
 	}
 }
-bool M6502::AND()
+void M6502::AND()
 {
-	return ram[activeRegs->PC] && activeRegs->A;
+	ram[activeRegs->PC] & activeRegs->A;
 }
 
 void M6502::ADC()
 {
-	uint8_t carry = (ram[activeRegs->PC] >> 7);
+	activeRegs->A + ram[activeRegs->PC] + (activeRegs->P << 0);
 
-	if (carry & 1)
-	{
-		activeRegs->P |= 0 << 1;
-	}
-
-	activeRegs->A + ram[activeRegs->PC] + activeRegs->P >> 0;
-
-	activeRegs->P |= 0 << activeRegs->A << 7; // Setting overflow in carry
-
+	activeRegs->P << 0 | (activeRegs->A << 7); // Setting overflow in carry
 } 
 
-bool M6502::EOR()
+void M6502::EOR()
 {
-	return activeRegs->A | ram[activeRegs->PC];
+	activeRegs->A ^ ram[activeRegs->PC];
 }
 
-bool M6502::ORA()
+void M6502::INC()
 {
-	return activeRegs->A || ram[activeRegs->PC];
+	ram[activeRegs->PC] + 1;
+}
+
+void M6502::INX()
+{
+	activeRegs->X + 1;
+}
+
+void M6502::INY()
+{
+	activeRegs->Y + 1;
+}
+
+void M6502::ORA()
+{
+	 activeRegs->A | ram[activeRegs->PC];
 }
 
 void M6502::LSR()
@@ -69,7 +76,10 @@ void M6502::ROL() // ROL copies the initial Carry flag to the lowmost bit of the
 void M6502::RTI()
 {
 	// Return from Interrupt
+	// Need to factor Stack and add handling in here
+	// the stack always uses some part of the $0100-$01FF page
 }
+
 
 void M6502::update()
 {
@@ -172,6 +182,18 @@ void M6502::execute(uint8_t OP) // What Addressing Mode are we in?
 		break;
 	case 0xA8:
 		TAY();
+		break;
+	case 0xC8:
+		INY();
+		break;
+	case 0xE6:
+		INC();
+		break;
+	case 0xE8:
+		INX();
+		break;
+	case 0xF6:
+		INC();
 		break;
 	case 0xF8:
 		break;

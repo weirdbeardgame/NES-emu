@@ -26,10 +26,13 @@ public:
 	void init();
 	void Reset();
 	void ADC();
-	bool AND();
-	bool EOR();
+	void AND();
+	void EOR();
+	void INC();
+	void INX();
+	void INY();
 	void LSR();
-	bool ORA();
+	void ORA();
 	void RTI();
 	void ROL();
 	void SED();
