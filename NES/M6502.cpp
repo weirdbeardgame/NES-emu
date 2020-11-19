@@ -22,13 +22,35 @@ void M6502::Reset()
 void M6502::AND()
 {
 	ram[activeRegs->PC] & activeRegs->A;
+	if (activeRegs->A == 0)
+	{
+		activeRegs->P | (1 << 2); // 1 is what's being written. 2 is postion. | is to set. Ie, if num is 0 OR 1 return 1. If num is 0 | 0 return 1
+	}
+
+	if (activeRegs->A & (1 >> 7)) // If Overflow. Carry muthafucker!
+	{
+		activeRegs->P |= 1 << 7;
+	}
+
+
 }
 
 void M6502::ADC()
 {
-	activeRegs->A + ram[activeRegs->PC] + (activeRegs->P << 0);
+	activeRegs->A = activeRegs->A + ram[activeRegs->PC] + (activeRegs->P & 1);
 
-	activeRegs->P << 0 | (activeRegs->A << 7); // Setting overflow in carry
+	if (activeRegs->A & (1 >> 7)) // If Overflow. Carry muthafucker!
+	{
+		activeRegs->P |= 1;
+	}
+
+	if (activeRegs->A == 0)
+	{
+		activeRegs->P | (1 << 2); // 1 is what's being written. 2 is postion. | is to set. Ie, if num is 0 OR 1 return 1. If num is 0 | 0 return 1
+	}
+
+	// Set overflow if sign bit is incorrect?
+
 } 
 
 void M6502::EOR()
@@ -65,11 +87,11 @@ void M6502::ROL() // ROL copies the initial Carry flag to the lowmost bit of the
 {
 	if (activeRegs->A == 0)
 	{
-		activeRegs->P |= 1 << 7;
+		activeRegs->P | 1 << 7;
 	}
 	else
 	{
-		activeRegs->A << (activeRegs->P >> 0 & 1);
+		activeRegs->A << (activeRegs->P << 0 & 1);
 	}
 }
 
@@ -100,7 +122,8 @@ void M6502::SEI()
 	activeRegs->P |= 1 << 1;
 }
 
-void M6502::STA()
+void M6502::STA() // An assembler will automatically select zero page addressing mode 
+                  // if the operand evaluates to a zero page address and the instruction supports the mode (not all do).
 {
 	ram[activeRegs->PC] = activeRegs->A;
 }

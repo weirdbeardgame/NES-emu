@@ -20,6 +20,8 @@ class M6502
 private:
 	registers* activeRegs;
 	uint8_t ram[0x800];
+	uint8_t stack[0x100];
+	int remainingCycleCount;
 	int i = 0;
 
 public:
