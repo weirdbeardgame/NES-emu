@@ -3,6 +3,9 @@
 #include <iomanip>
 #include <fstream>
 #include <vector>
+
+#include "Memory.h"
+
 struct registers
 {
 	uint8_t A;
@@ -19,8 +22,8 @@ class M6502
 {
 private:
 	registers* activeRegs;
-	uint8_t ram[0x800];
-	uint8_t stack[0x100];
+	// The CPU has a 16-bit address space (up to 64kb can be refrenced) but only a 2 kb size of ram. Address space is not ram!
+	Memory cpuAddressSpace;
 	int remainingCycleCount;
 	int i = 0;
 

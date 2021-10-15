@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\final\source\repos\NES\Debug\NES.exe</FullPath>
+      <FullPath>C:\Users\final\source\repos\NES-emu\Debug\NES.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

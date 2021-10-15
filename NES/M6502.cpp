@@ -6,22 +6,30 @@ void M6502::Reset()
 
 	activeRegs = new registers();
 
-    activeRegs->P = 0x34;
+	activeRegs->P = 0x34;
 	activeRegs->A = 0x00;
 	activeRegs->X = 0x00;
 	activeRegs->Y = 0x00;
 	activeRegs->SP = 0xFD;
 
-	std::ifstream in("C:/Users/final/source/repos/NES/nestest.nes", std::ios::binary);
+	cpuAddressSpace.init();
+
+	std::ifstream in("C:/Users/final/source/repos/NES-emu/NES/nestest.nes", std::ios::binary);
+
+	// Do note that the size of in here is intended to be the actual file buffer length
+	// Though I have a sneaking suspicion that this will end up just being the size of pointer value or some retarded thing like that
+	uint8_t* temp = new uint8_t(sizeof(in));
 
 	for (uint8_t i = 0; i < sizeof(in); i++)
 	{
-		in >> ram[i];
+		in >> temp[i];
 	}
+	// cpuspace[0x8000] = temp[0x10]; // Reading into the beginning of mappable cpu memory. Skip past 16 byte header
 }
 void M6502::AND()
 {
-	ram[activeRegs->PC] & activeRegs->A;
+	cpuAddressSpace.WriteRam (activeRegs->PC, activeRegs->A);
+	//ram[activeRegs->PC] &= activeRegs->A;
 	if (activeRegs->A == 0)
 	{
 		activeRegs->P | (1 << 2); // 1 is what's being written. 2 is postion. | is to set. Ie, if num is 0 OR 1 return 1. If num is 0 | 0 return 1
@@ -37,7 +45,7 @@ void M6502::AND()
 
 void M6502::ADC()
 {
-	activeRegs->A = activeRegs->A + ram[activeRegs->PC] + (activeRegs->P & 1);
+	//activeRegs->A = activeRegs->A + ram[activeRegs->PC] + (activeRegs->P & 1);
 
 	if (activeRegs->A & (1 >> 7)) // If Overflow. Carry muthafucker!
 	{
@@ -55,27 +63,27 @@ void M6502::ADC()
 
 void M6502::EOR()
 {
-	activeRegs->A ^ ram[activeRegs->PC];
+	//activeRegs->A ^ ram[activeRegs->PC];
 }
 
 void M6502::INC()
 {
-	ram[activeRegs->PC] + 1;
+	//ram[activeRegs->PC] += 1;
 }
 
 void M6502::INX()
 {
-	activeRegs->X + 1;
+	activeRegs->X += 1;
 }
 
 void M6502::INY()
 {
-	activeRegs->Y + 1;
+	activeRegs->Y += 1;
 }
 
 void M6502::ORA()
 {
-	 activeRegs->A | ram[activeRegs->PC];
+	 //activeRegs->A | ram[activeRegs->PC];
 }
 
 void M6502::LSR()
@@ -107,8 +115,8 @@ void M6502::update()
 {
 	while (true)
 	{
-		uint8_t opcode = (ram[activeRegs->PC++]);
-		execute(opcode);
+		//uint8_t opcode = (ram[activeRegs->PC++]);
+		//execute(opcode);
 	}
 }
 
@@ -122,10 +130,11 @@ void M6502::SEI()
 	activeRegs->P |= 1 << 1;
 }
 
-void M6502::STA() // An assembler will automatically select zero page addressing mode 
-                  // if the operand evaluates to a zero page address and the instruction supports the mode (not all do).
+// An assembler will automatically select zero page addressing mode
+// if the operand evaluates to a zero page address and the instruction supports the mode (not all do).
+void M6502::STA()
 {
-	ram[activeRegs->PC] = activeRegs->A;
+	//ram[activeRegs->PC] = activeRegs->A;
 }
 
 void M6502::TAY()
