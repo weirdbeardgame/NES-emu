@@ -17,16 +17,29 @@ struct registers
 
 };
 
+enum FileStandard{INES, NES2};
+
+struct cartData
+{
+	FileStandard romStandard;
+	int prgSize;
+	int chrSize;
+	// 0, horizontal 1, vertical
+	uint8_t mapperMirroring;
+	// Bit 7 is the actual mapper data
+	uint8_t mapper;
+};
+
 
 class M6502
 {
 private:
 	registers* activeRegs;
+	cartData cartridge;
 	// The CPU has a 16-bit address space (up to 64kb can be refrenced) but only a 2 kb size of ram. Address space is not ram!
 	Memory cpuAddressSpace;
 	int remainingCycleCount;
 	int i = 0;
-
 public:
 	void init();
 	void Reset();

@@ -1,9 +1,9 @@
 #include "M6502.h"
 #include <bitset>
 
+// In the future this logic needs to be broken into the other loadRom function...
 void M6502::Reset()
 {
-
 	activeRegs = new registers();
 
 	activeRegs->P = 0x34;
@@ -19,10 +19,37 @@ void M6502::Reset()
 	// Do note that the size of in here is intended to be the actual file buffer length
 	// Though I have a sneaking suspicion that this will end up just being the size of pointer value or some retarded thing like that
 	uint8_t* temp = new uint8_t(sizeof(in));
-
+	uint8_t* header = new uint8_t(0x10);
 	for (uint8_t i = 0; i < sizeof(in); i++)
 	{
 		in >> temp[i];
+	}
+	memcpy(header, temp, 0x10);
+	std::string title = { &header[0], &header[3] };
+	if (title.find("NES<EOF>") != std::string::npos)
+	{
+		throw("Not a valid nes file!");
+		return;
+	}
+	cartridge.romStandard = FileStandard::INES;
+	// This is a NES 2.0 standard file
+	if ((header[7] & 0x0C) == 0x08)
+	{
+		cartridge.romStandard = FileStandard::NES2;
+	}
+
+	switch (cartridge.romStandard)
+	{
+	case FileStandard::INES:
+		printf("INES \n");
+		cartridge.prgSize = header[4];
+		cartridge.chrSize = header[5];
+		break;
+
+	case FileStandard::NES2:
+		printf("NES 2.0 \n");
+		// Mapper number is 12 bit
+		break;
 	}
 	// cpuspace[0x8000] = temp[0x10]; // Reading into the beginning of mappable cpu memory. Skip past 16 byte header
 }
