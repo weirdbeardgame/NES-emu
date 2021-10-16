@@ -1,9 +1,0 @@
-﻿  M6502.cpp
-C:\Users\final\source\repos\NES-emu\NES\M6502.cpp(27,17): warning C4552: '|': result of expression not used
-C:\Users\final\source\repos\NES-emu\NES\M6502.cpp(49,17): warning C4552: '|': result of expression not used
-C:\Users\final\source\repos\NES-emu\NES\M6502.cpp(58,16): warning C4552: '^': result of expression not used
-C:\Users\final\source\repos\NES-emu\NES\M6502.cpp(78,17): warning C4552: '|': result of expression not used
-C:\Users\final\source\repos\NES-emu\NES\M6502.cpp(83,16): warning C4552: '>>': result of expression not used
-C:\Users\final\source\repos\NES-emu\NES\M6502.cpp(90,17): warning C4552: '|': result of expression not used
-C:\Users\final\source\repos\NES-emu\NES\M6502.cpp(94,17): warning C4552: '<<': result of expression not used
-  NES.vcxproj -> C:\Users\final\source\repos\NES-emu\Debug\NES.exe

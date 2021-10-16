@@ -12,6 +12,7 @@ struct registers
 	uint8_t X, Y; //used for holding things such as iteration counts or as offsets to addressing modes. The X register in addition can be used to set or get the SP.
 	uint8_t P; // Flags. C, Z, V, S, I
 	
+	// Both of these are supposed to point to memory addresses
 	uint16_t SP; // 0x100 to 0x1FF
 	uint16_t PC;
 
@@ -24,8 +25,19 @@ struct cartData
 	FileStandard romStandard;
 	int prgSize;
 	int chrSize;
-	// 0, horizontal 1, vertical
+
+	/***************************************************************************************************
+	* 76543210
+	* ||||||||
+	* |||||||+- Mirroring: 0: horizontal (vertical arrangement) (CIRAM A10 = PPU A11)
+	* |||||||			1: vertical (horizontal arrangement) (CIRAM A10 = PPU A10)
+	* ||||||+-- 1: Cartridge contains battery-backed PRG RAM ($6000-7FFF) or other persistent memory
+	* |||||+--- 1: 512-byte trainer at $7000-$71FF (stored before PRG data)
+	* ||||+---- 1: Ignore mirroring control or above mirroring bit; instead provide four-screen VRAM
+	* ++++----- Lower nybble of mapper number
+	***************************************************************************************************/
 	uint8_t mapperMirroring;
+
 	// Bit 7 is the actual mapper data
 	uint8_t mapper;
 };
@@ -45,6 +57,7 @@ public:
 	void Reset();
 	void ADC();
 	void AND();
+	void ASL(uint8_t& shift);
 	void EOR();
 	void INC();
 	void INX();
