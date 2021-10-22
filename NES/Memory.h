@@ -16,6 +16,7 @@ class Memory
 {
 private:
 	uint8_t* addressSpace;
+	uint8_t SP; // Register S or rather. Stack pointer
 public:
 	uint8_t pullStack();
 	uint8_t ReadRam(uint8_t loc);

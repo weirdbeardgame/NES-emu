@@ -4,11 +4,45 @@ void Memory::init()
 {
 	addressSpace = new uint8_t(0xFFFF);
 	memset(addressSpace, 0, sizeof(addressSpace));
+	SP = 0xFD;
 }
+
+// $0100-$01FF
+// Note that stack works in reverse on MOS6502
+void Memory::pushStack(uint8_t val)
+{
+	if ((0x1 + SP) > 0x0100)
+	{
+		addressSpace[SP] = val;
+		SP -= 1;
+	}
+	else
+	{
+		throw("Stack Overflow");
+		return;
+	}
+}
+
+uint8_t Memory::pullStack()
+{
+	if ((0x1 + SP) < 0x1FF)
+	{
+		uint8_t val = std::move(addressSpace[(0x1 + SP)]);
+		SP += 1;
+		return val;
+	}
+	else
+	{
+		// Return empty stack
+		throw("Stack Underflow");
+		return -1;
+	}
+}
+
 
 void Memory::WriteRam(uint8_t loc, uint8_t val)
 {
-	if (loc < 0x000 && loc > 0x07FF)
+	if (loc < 0x000 || loc > 0x07FF)
 	{
 		throw("Outside range of ram!");
 	}
@@ -56,7 +90,7 @@ void Memory::WriteCartSpace(uint8_t loc, uint8_t val)
 
 uint8_t Memory::ReadRam(uint8_t loc)
 {
-	if (loc < 0x000 && loc > 0x07FF)
+	if (loc < 0x000 || loc > 0x07FF)
 	{
 		throw("Outside range of ram!");
 		return -1;

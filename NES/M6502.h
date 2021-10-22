@@ -20,6 +20,17 @@ struct registers
 
 enum FileStandard{INES, NES2};
 
+enum Flags 
+{
+	C = 0,
+	Z = 1,
+	I = 2,
+	D = 3,
+	B = 4,
+	V = 6,
+	N = 7
+};
+
 struct cartData
 {
 	FileStandard romStandard;

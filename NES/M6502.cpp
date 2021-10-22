@@ -10,7 +10,6 @@ void M6502::Reset()
 	activeRegs->A = 0x00;
 	activeRegs->X = 0x00;
 	activeRegs->Y = 0x00;
-	activeRegs->SP = 0xFD;
 
 	cpuAddressSpace.init();
 
@@ -53,6 +52,15 @@ void M6502::Reset()
 		// Mapper number is 12 bit
 		break;
 	}
+	for (int i = 0; i < cartridge.prgSize; i++)
+	{
+		for (int j = 0x10; j < sizeof(temp); j++)
+		{
+			// Prg rom. 16kb banks
+			//cpuAddressSpace.WriteCartSpace(i, temp[j]);
+		}
+	}
+	activeRegs->PC = cpuAddressSpace.ReadCartSpace(0x8000);
 	// cpuspace[0x8000] = temp[0x10]; // Reading into the beginning of mappable cpu memory. Skip past 16 byte header
 }
 void M6502::AND()
@@ -60,30 +68,32 @@ void M6502::AND()
 	activeRegs->A &= cpuAddressSpace.ReadCartSpace(activeRegs->PC);
 	if (activeRegs->A == 0)
 	{
-		activeRegs->P | (1 << 2); // 1 is what's being written. 2 is postion. | is to set. Ie, if num is 0 OR 1 return 1. If num is 0 | 0 return 1
+		activeRegs->P | (1 << Flags::Z);
 	}
 
-	if (activeRegs->A & (1 >> 7)) // If Overflow. Carry muthafucker!
+	if (activeRegs->A & (1 << 7)) // If Overflow. Carry muthafucker!
 	{
-		activeRegs->P |= 1 << 7;
+		activeRegs->P |= 1 << Flags::N;
 	}
 }
 
 void M6502::ADC()
 {
-	activeRegs->A += cpuAddressSpace.ReadCartSpace(activeRegs->PC) + (activeRegs->P & 1);
+	// A + M + C
+	activeRegs->A += cpuAddressSpace.ReadCartSpace(activeRegs->PC) + (activeRegs->P & (1 << Flags::C));
 
-	if (activeRegs->A & (1 >> 7)) // If Overflow. Carry muthafucker!
+	// Check if bit 7 is active
+	if (activeRegs->A & (1 << 7))
 	{
-		activeRegs->P |= 1;
+		activeRegs->P |= 1 << Flags::N;
 	}
 
 	if (activeRegs->A == 0)
 	{
-		activeRegs->P | (1 << 2); // 1 is what's being written. 2 is postion. | is to set. Ie, if num is 0 OR 1 return 1. If num is 0 | 0 return 1
+		activeRegs->P | (1 << Flags::Z);
 	}
 
-	// Set overflow if sign bit is incorrect?
+	// Check for overflow in bit 7?
 
 } 
 
@@ -120,7 +130,7 @@ void M6502::ORA()
 	 if (activeRegs->A == 0)
 	 {
 		 // Set Zero Flag
-		 activeRegs->P |= 1 << 2;
+		 activeRegs->P |= 1 << Flags::Z;
 	 }
 }
 
@@ -129,7 +139,7 @@ void M6502::LSR()
 	activeRegs->A >> 1;
 }
 
-void M6502::ROL() // ROL copies the initial Carry flag to the lowmost bit of the byte; Either Ram or Accumulator. Rn, just Accumulator. 
+void M6502::ROL() 
 {
 	if (activeRegs->A == 0)
 	{
@@ -146,6 +156,8 @@ void M6502::RTI()
 	// Return from Interrupt
 	// Need to factor Stack and add handling in here
 	// the stack always uses some part of the $0100-$01FF page
+	activeRegs->P = cpuAddressSpace.pullStack();
+	activeRegs->PC = cpuAddressSpace.pullStack();
 }
 
 
@@ -161,12 +173,12 @@ void M6502::update()
 
 void M6502::SED()
 {
-	activeRegs->P |= 1 << 2;
+	activeRegs->P |= 1 << Flags::D;
 }
 
 void M6502::SEI()
 {
-	activeRegs->P |= 1 << 1;
+	activeRegs->P |= 1 << Flags::I;
 }
 
 // An assembler will automatically select zero page addressing mode
@@ -178,10 +190,16 @@ void M6502::STA()
 
 void M6502::TAY()
 {
-	activeRegs->Y = activeRegs->A;
+	activeRegs->Y = std::move(activeRegs->A);
+	if (activeRegs->Y == 0)
+	{
+		// Set Zero Flag
+		activeRegs->P |= 1 << Flags::Z;
+	}
 }
 
-void M6502::execute(uint8_t OP) // What Addressing Mode are we in?
+// Right now just implied Addressing
+void M6502::execute(uint8_t OP)
 {
 
 	std::cout << "PC: 0x" << std::hex << unsigned(OP) << std::endl;
@@ -192,9 +210,15 @@ void M6502::execute(uint8_t OP) // What Addressing Mode are we in?
 
 	switch (OP)
 	{
+	case 0x00:
+		// BRK, Force interrupt
+		break;
 	case 0x01:
 		// ORA! Logical Inclusive OR
 		ORA();
+		break;
+	case 0x8:
+		cpuAddressSpace.pushStack(activeRegs->P);
 		break;
 	case 0x1A:
 		// NOP
@@ -203,6 +227,10 @@ void M6502::execute(uint8_t OP) // What Addressing Mode are we in?
 	case 0x2A:
 		ROL();
 		break;
+	case 0x28:
+		activeRegs->P = cpuAddressSpace.pullStack();
+		break;
+
 	case 0x40:
 		// Return from interrupt
 		RTI();
@@ -214,38 +242,26 @@ void M6502::execute(uint8_t OP) // What Addressing Mode are we in?
 		// Logical Shift Right
 		LSR();
 		break;
+	case 0x48:
+		cpuAddressSpace.pushStack(activeRegs->A);
+		break;
+	case 0x60:
+		activeRegs->PC = (cpuAddressSpace.pullStack() - 1);
+		break;
+	case 0x68:
+		activeRegs->A = cpuAddressSpace.pullStack();
+		break;
 	case 0x69:
 		ADC();
 		break;
 	case 0x78:
-		SEI();
+		activeRegs->P |= 1 << 2;
 		break;
 	case 0x83:
 		// Rotate one bit to Left
 		break;
-	case 0x81:
-		// STA Indirect,X
-		STA();
-		break;
-	case 0x85:
-		// STA Zero Page
-		STA();
-		break;
-	case 0x8D:
-		// STA Absolute
-		STA();
-		break;
-	case 0x91:
-		// STA Indirect,Y
-		STA();
-		break;
-	case 0x95:
-		// STA Zero Page,X
-		STA();
-		break;
-	case 0x99:
-		//Absolute,Y
-		STA();
+	case 0x9A:
+		cpuAddressSpace.pushStack(std::move(activeRegs->X));
 		break;
 	case 0x9D:
 		// STA Absolute,X
@@ -253,6 +269,12 @@ void M6502::execute(uint8_t OP) // What Addressing Mode are we in?
 		break;
 	case 0xA8:
 		TAY();
+		break;
+	case 0xAA:
+		activeRegs->X = std::move(activeRegs->A);
+		break;
+	case 0xBA:
+		activeRegs->X = cpuAddressSpace.pullStack();
 		break;
 	case 0xC8:
 		INY();
