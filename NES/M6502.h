@@ -9,13 +9,16 @@
 struct registers
 {
 	uint8_t A;
-	uint8_t X, Y; //used for holding things such as iteration counts or as offsets to addressing modes. The X register in addition can be used to set or get the SP.
-	uint8_t P; // Flags. C, Z, V, S, I
+	//used for holding things such as iteration counts or as offsets to addressing modes. The X register in addition can be used to set or get the SP.
+	uint8_t X, Y;
+	// Flags. C, Z, V, S, I
+	uint8_t P;
 	
 	// Both of these are supposed to point to memory addresses
-	uint16_t SP; // 0x100 to 0x1FF
+	// 0x100 to 0x1FF
+	uint16_t SP;
+	// PCH, PCL 8 bit halves of the pointer counter though in reality it's all treated as one singular 16bit counter or value
 	uint16_t PC;
-
 };
 
 enum FileStandard{INES, NES2};
@@ -69,6 +72,8 @@ public:
 	void ADC();
 	void AND();
 	void ASL(uint8_t& shift);
+	void BCC();
+	void BCS();
 	void EOR();
 	void INC();
 	void INX();

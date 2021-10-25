@@ -15,19 +15,19 @@
 class Memory
 {
 private:
-	uint8_t* addressSpace;
+	uint16_t* addressSpace;
 	uint8_t SP; // Register S or rather. Stack pointer
 public:
 	uint8_t pullStack();
 	uint8_t ReadRam(uint8_t loc);
 	uint8_t ReadPpu(uint8_t loc);
 	uint8_t ReadApu(uint8_t loc);
-	uint8_t ReadCartSpace(uint8_t loc);
+	uint8_t ReadCartSpace(uint16_t loc);
 
 	void init();
 	void pushStack(uint8_t val);
 	void WriteRam(uint8_t loc, uint8_t val);
 	void WritePpu(uint8_t loc, uint8_t val);
 	void WriteApu(uint8_t loc, uint8_t val);
-	void WriteCartSpace(uint8_t loc, uint8_t val);
+	void WriteCartSpace(uint16_t loc, uint8_t val);
 };

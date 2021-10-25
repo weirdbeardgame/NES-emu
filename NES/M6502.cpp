@@ -56,12 +56,11 @@ void M6502::Reset()
 	{
 		for (int j = 0x10; j < sizeof(temp); j++)
 		{
-			// Prg rom. 16kb banks
+			// Prg rom. 16kb banks. The rom isn't written to 0x8000 it's mapped to it big difference!
 			//cpuAddressSpace.WriteCartSpace(i, temp[j]);
 		}
 	}
-	activeRegs->PC = cpuAddressSpace.ReadCartSpace(0x8000);
-	// cpuspace[0x8000] = temp[0x10]; // Reading into the beginning of mappable cpu memory. Skip past 16 byte header
+	//activeRegs->PC = cpuAddressSpace.ReadCartSpace(0x8000);
 }
 void M6502::AND()
 {
@@ -103,9 +102,32 @@ void M6502::ASL(uint8_t& shift)
 	activeRegs->P = 0;
 }
 
+// To increment the PC by an offset
+void M6502::BCC()
+{
+	// In relative add the value to the PC following the OP Code
+	if (~(activeRegs->P & Flags::C)) // This is wrong. I probably need to mask the bit out. 
+	{
+		activeRegs->PC += 1;
+		uint8_t immediate = cpuAddressSpace.ReadCartSpace(activeRegs->PC);
+		activeRegs->PC += immediate;
+	}
+
+}
+
 void M6502::EOR()
 {
 	activeRegs->A ^ cpuAddressSpace.ReadCartSpace(activeRegs->PC);
+	if (activeRegs->A == 0)
+	{
+		// Set Zero Flag
+		activeRegs->P |= 1 << Flags::Z;
+	}
+	// Mask off all but bit 7. If bit 7 active set negative flag
+	if (activeRegs->A & 0x80 >> 1)
+	{
+		activeRegs->P |= 1 << Flags::N;
+	}
 }
 
 void M6502::INC()
@@ -124,6 +146,7 @@ void M6502::INY()
 	activeRegs->Y += 1;
 }
 
+// Star Platinum noises
 void M6502::ORA()
 {
 	 activeRegs->A | cpuAddressSpace.ReadCartSpace(activeRegs->PC);
@@ -165,7 +188,7 @@ void M6502::update()
 {
 	while (true)
 	{
-		uint8_t opcode = (cpuAddressSpace.ReadCartSpace(activeRegs->PC));
+		uint8_t opcode = (cpuAddressSpace.ReadCartSpace(activeRegs->PC) & 0b11110000 >> 4);
 		execute(opcode); 
 		activeRegs->PC += 1; // Though note the program is going to provide the offset!
 	}
@@ -230,7 +253,6 @@ void M6502::execute(uint8_t OP)
 	case 0x28:
 		activeRegs->P = cpuAddressSpace.pullStack();
 		break;
-
 	case 0x40:
 		// Return from interrupt
 		RTI();
@@ -239,7 +261,7 @@ void M6502::execute(uint8_t OP)
 		// EOR - Zero Page. I'm assuming clears the register shit out?
 		break;
 	case 0x4e:
-		// Logical Shift Right
+		// Logical Shift Right or division
 		LSR();
 		break;
 	case 0x48:

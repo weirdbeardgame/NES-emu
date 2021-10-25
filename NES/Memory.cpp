@@ -2,7 +2,7 @@
 
 void Memory::init()
 {
-	addressSpace = new uint8_t(0xFFFF);
+	addressSpace = new uint16_t(0xFFFF);
 	memset(addressSpace, 0, sizeof(addressSpace));
 	SP = 0xFD;
 }
@@ -76,7 +76,7 @@ void Memory::WriteApu(uint8_t loc, uint8_t val)
 	}
 }
 
-void Memory::WriteCartSpace(uint8_t loc, uint8_t val)
+void Memory::WriteCartSpace(uint16_t loc, uint8_t val)
 {
 	if (loc < 0x4020 || loc > 0xFFFF)
 	{
@@ -127,7 +127,7 @@ uint8_t Memory::ReadApu(uint8_t loc)
 	}
 }
 
-uint8_t Memory::ReadCartSpace(uint8_t loc)
+uint8_t Memory::ReadCartSpace(uint16_t loc)
 {
 	if (loc < 0x4020 || loc > 0xFFFF)
 	{
